@@ -25,11 +25,21 @@ The goal of this article is to share some condensed ideas on exploring missing d
 # Start looking at missing data?
 
 ```{r}
-#| label: load-pkgs
+#| echo: false
 options(tidyverse.quiet = TRUE)
+library(knitr)
+```
+
+
+```{r}
+#| label: load-pkgs
 library(tidyverse)
 library(visdat)
 library(naniar)
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 ```
 
 We can use the `visdat` package [@visdat] to get an overview of the missingness of an entire data set. It was heavily inspired by [`csv-fingerprint`](https://setosa.io/blog/2014/08/03/csv-fingerprints/), and functions like `missmap`, from `Amelia` [@amelia].
@@ -47,7 +57,52 @@ We learn that there is nearly 5% missing data overall, the missing data occurs i
 
 ### Facetting in visdat
 
+<<<<<<< Updated upstream
 You can also split up the `vis_miss` plots into several facetted plots via the `facet` argument. For example, in @fig-vis-miss-facet we facet by the `Month` variable.
+=======
+The goal of this article is to share some condensed ideas on exploring missing data, using `naniar`, and `visdat`. To that end, we will focus on four questions.
+
+1.  How do we start looking at missing data?
+2.  How do we explore missingness in variables?
+3.  How do we explore missingness relationships?
+4.  How do we explore imputed values?
+
+But first, let's introduce ourselves to the data.
+
+# The data
+
+The data used for this paper is measurements of rodents in Kansas, from @hope2023. 
+The use of this data is inspired by Allison Horst's "Exploring missing values in naniar" [shiny application](https://allisonhorst.shinyapps.io/missingexplorer/). 
+In this paper we use a different, larger set of the data. For information on the metadata of the paper see [here](http://lter.konza.ksu.edu/content/csm08-small-mammal-host-parasite-sampling-data-16-linear-trapping-transects-located-8-lter). 
+The data set provides various biometric length and weight measurements, for four species of rodents: the Eastern woodrat, Prairie vole, Western harvest mouse, and Deer mouse. 
+Table @tbl-rodents-slice shows a snapshot of 6 rows of the data, including some of the missingness.
+
+```{r}
+#| label: tbl-rodents-slice
+#| echo: false
+rodents %>% 
+  # selected snapshot of interesting missingness
+  filter(between(row_number(), 75, 80)) %>% 
+  kable(caption = "The rodents dataset, containing measurements of various rodents, including: total length - from tail to nose, tail length, hind foot length, ear length, and weight. Each row represents a measurement of a given species of roden at a particular date. There are missing values.")
+```
+
+# How do we start looking at missing data?
+
+To get an overview of the missing data, we can use the `visdat` package [@visdat], which was inspired by the work in [`csv-fingerprint`](https://setosa.io/blog/2014/08/03/csv-fingerprints/), and functions like `missmap`, from `Amelia` [@amelia]. The key function for exploring missingness is `vis_miss()`, which visualises the missingness of a whole dataframe. @fig-vis-miss gives an example where it displays the data as missing, or not missing, and provides information on the amount of missings in each column.
+
+
+```{r}
+#| label: fig-vis-miss
+#| fig-cap: "An overview of missing data in the rodents dataset. The x axis shows the variables of the data, along with the amount of missingness in that variable, and the y axis shows the rows. Each cell represents the missingness of a datum. The overall missingness is given in a percentage below in the legend. We learn that there is nearly 29% missing data overall, the missing data occurs in total_length, tail_length, hind_foot_length, ear_length, weight, and age."
+vis_miss(rodents)
+```
+
+We learn there is nearly 29% missing data overall, the missing data occurs in total_length, tail_length, hind_foot_length, ear_length, weight, and age, and mostly in total length and ear_length. 
+
+## Exploring subgroups: Using facetting in visdat
+
+To see this plot split up by species, we can split up the `vis_miss` plots into several facetted plots via the `facet` argument. For example, in @fig-vis-miss-facet we facet by the `species` variable. Visually, it appears that the missingness occurs in each species at roughly the same rate. 
+>>>>>>> Stashed changes
 
 ```{r}
 #| label: fig-vis-miss-facet
@@ -85,7 +140,17 @@ gg_miss_var(airquality, facet = Month)
 
 Where we learn that month 9 doesn't have much missing data, and a lot of the missing data seems to occur in month 6.
 
+<<<<<<< Updated upstream
 There are more visualisations available in `naniar` (each starting with `gg_miss_`) - you can see these in the ["Gallery of Missing Data Visualisations" vignette](https://cran.r-project.org/package=naniar/vignettes/naniar-visualisation.html). The plots created with the `gg_miss` family all have a basic theme, but you can customise them by adding components like a standard ggplot object:
+=======
+```{r}
+#| label: fig-gg-miss-upset
+#| fig-cap: "An upset plot of 7 sets of missingness in the rodents data displaying a more nuanced depiction of the patterns of missingness in the data. The number of missings in each variable is seen on the bottom left bar plot. The bottom panel shows the different sets of co-occuring missingness. For example, the bottom left two dots show ear length and total length going missing together - corresponding to the bar plot above it, showing 278 missings. We learn that there are two dominant sets of missingness, where ear length and total length go missing, and then weight hind foot length, tail length, ear length and total length being missing."
+gg_miss_upset(rodents)
+```
+
+There are more visualisations available in `naniar` (each starting with `gg_miss_`) - you can see these in the ["Gallery of Missing Data Visualisations" vignette](https://cran.r-project.org/package=naniar/vignettes/naniar-visualisation.html). Most plots created with the `gg_miss` family all have a basic theme (except for `gg_miss_upset()`), but you can customise them by adding components like a standard ggplot object:
+>>>>>>> Stashed changes
 
 ```{r}
 #| label: gg-miss-var-theme
@@ -189,7 +254,11 @@ ggplot(airquality,
 
 ## Numerical summaries of missing values
 
+<<<<<<< Updated upstream
 `naniar` provide numerical summaries for missing data. Two convenient counters of complete values and missings are `n_miss()` and `n_complete()`. These work on both dataframes and vectors, similar to `dplyr::n_distinct()`
+=======
+As evidenced by @fig-gg-miss-upset, there is a structure in the missingness in the rodents data. We can perform some basic clustering on the missingness and then and learn which variables and their values predict these missingness groups using decision trees [@Tierney2015; @Barnett2017]. We start by adding missingness clusters, choosing four based on @fig-gg-miss-upset. We encourage exploring different numbers of clusters. We can then confirm this pattern using visualisations.
+>>>>>>> Stashed changes
 
 ```{r}
 #| label: helpers-n-miss
@@ -216,6 +285,7 @@ prop_miss_case(airquality)
 pct_miss_case(airquality)
 ```
 
+<<<<<<< Updated upstream
 `miss_case_summary()` returns a numeric value that describes the number of missings in a given case (aka row), the percent of missings in that row.
 
 ```{r}
@@ -223,6 +293,22 @@ pct_miss_case(airquality)
 
 miss_case_summary(airquality)
 
+=======
+Variable importance scores (@tbl-var-imp) reveal the most important variables for predicting missingness cluster are date and sex. 
+
+```{r}
+#| label: tbl-var-imp
+#| echo: false
+library(tibble)
+imp_tbl <- tibble(
+  variable = names(rodent_miss_cart$variable.importance),
+  importance = rodent_miss_cart$variable.importance
+) 
+kable(
+  imp_tbl,
+  caption = "Variable importance scores for predicting missingness cluster. The most important variables are date and sex."
+  )
+>>>>>>> Stashed changes
 ```
 
 `miss_case_table()` tabulates the number of missing values in a case / row. Below, this shows the number of missings in a case:
@@ -379,6 +465,23 @@ ggplot(aq_mean_imputed,
   scale_colour_brewer(palette = "Dark2")
 ```
 
+<<<<<<< Updated upstream
+=======
+We can see see the two different imputation methods side by side in @fig-imputed-comparison.
+
+```{r}
+#| label: fig-imputed-comparison
+#| fig-cap: "Comparing imputation methods of tail length in a scatterplot of tail length vs weight. Weight is on the X axis and tail_length is on the Y axis, and the points are coloured by whether they are imputed - 'NA' indicates a previously missing value that has been imputed. We learn that mean imputation provides imputations that are not representative, linear models with no residuals are representative of the data but very concentrated, and adding residuals adds much more variation to your data."
+
+ggplot(rodents_imputed_comparison,
+         aes(x = weight,
+             y = tail_length,
+             colour = tail_length_NA)) + 
+  geom_point(alpha = 0.5) + 
+  scale_colour_brewer(palette = "Dark2") + 
+  facet_wrap(~imputation_type)
+```
+>>>>>>> Stashed changes
 
 # Conclusion
 

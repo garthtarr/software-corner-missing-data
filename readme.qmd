@@ -3,6 +3,7 @@ title: "Some ideas for exploring missing data"
 format: 
   docx: default
   html: default
+  gfm: default
 fig-format: retina
 bibliography: references.bib
 ---

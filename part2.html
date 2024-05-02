@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Some ideas for exploring missing data (Part 2)</title>
+<title>Further ideas for exploring missing data</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -100,7 +100,7 @@ div.csl-indent {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Some ideas for exploring missing data (Part 2)</h1>
+<h1 class="title">Further ideas for exploring missing data</h1>
 </div>
 
 
@@ -120,51 +120,46 @@ div.csl-indent {
 <p>Nicholas Tierney</p>
 <p>Infectious Disease Ecology and Modelling group</p>
 <p>Telethon Kids Institute, Perth, WA, Australia</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(visdat)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(naniar)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>NOTE: NOT YET REWORKED AFTER THE SPLIT, CURRENTLY COPY AND PASTE</p>
 <section id="introduction" class="level1">
 <h1>Introduction</h1>
 <p>When you do data analysis, you come across missing data. Because I felt so frustrated by how hard it was to handle and wrangle missing data, I wanted to make it easier. In my endeavours I have written two R packages, <code>visdat</code> and <code>naniar</code>, for exploring missing data, and several papers on the topic.</p>
-<p>The goal of this article is to share some condensed ideas on exploring missing data, using <code>naniar</code>, and <code>visdat</code>. To that end, we will focus on four questions.</p>
+<p>The present goal is to share some ideas on exploring missing data, using <code>naniar</code>, and <code>visdat</code>. To that end, we will focus on four questions.</p>
 <ol type="1">
 <li>How do we start looking at missing data?</li>
 <li>How do we explore missingness in variables?</li>
 <li>How do we explore missingness relationships?</li>
 <li>How do we explore imputed values?</li>
 </ol>
+<p>Questions 1 and 2 were explored in the previous Software Corner article. This article considers questions 3 and 4.</p>
+<p>But first, let’s reacquaint ourselves with the data.</p>
+</section>
+<section id="the-data" class="level1">
+<h1>The data</h1>
+<p>The data used for this paper is measurements of rodents in Kansas, from <span class="citation" data-cites="hope2023">Hope (<a href="#ref-hope2023" role="doc-biblioref">2023</a>)</span>. The use of this data is inspired by Allison Horst’s “Exploring missing values in naniar” <a href="https://allisonhorst.shinyapps.io/missingexplorer/">shiny application</a>. In this paper we use a different, larger set of the data. For information on the metadata of the paper see <a href="http://lter.konza.ksu.edu/content/csm08-small-mammal-host-parasite-sampling-data-16-linear-trapping-transects-located-8-lter">here</a>. The data set provides various biometric length and weight measurements, for four species of rodents: the Eastern woodrat, Prairie vole, Western harvest mouse, and Deer mouse.</p>
 </section>
 <section id="how-to-explore-missingness-relationships" class="level1">
 <h1>How to explore missingness relationships?</h1>
-<p>We can identify key missing variables using <code>vis_miss()</code>, <code>gg_miss_var()</code>, and <code>gg_miss_upset()</code>, but for further exploration, we need to explore the relationship amongst the variables in this data:</p>
-<ul>
-<li>date</li>
-<li>species</li>
-<li>total_length</li>
-<li>tail_length</li>
-<li>hind_foot_length</li>
-<li>ear_length</li>
-<li>weight</li>
-<li>sex</li>
-<li>age</li>
-</ul>
+<p>We can identify key missing variables using <code>vis_miss()</code>, <code>gg_miss_var()</code>, and <code>gg_miss_upset()</code>, but for further exploration, we need to explore the relationship amongst the variables in this data: <code>date</code>, <code>species</code>, <code>total_length</code>, <code>tail_length</code>, <code>hind_foot_length</code>, <code>ear_length</code>, <code>weight</code>, <code>sex</code>, and <code>age</code>.</p>
 <section id="exploring-using-bivariate-plots" class="level2">
 <h2 class="anchored" data-anchor-id="exploring-using-bivariate-plots">Exploring using bivariate plots</h2>
 <p>Let’s say that we want to explore the relationship between tail length and ear length. <a href="#fig-example-geom-point" class="quarto-xref">Figure&nbsp;1</a> shows a scatter plot of tail length and ear length.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(rodents, </span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> ear_length, </span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> tail_length)) <span class="sc">+</span> </span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(visdat)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(naniar)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(rodents, </span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> ear_length, </span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> tail_length)) <span class="sc">+</span> </span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 530 rows containing missing values or values outside the scale range
+(`geom_point()`).</code></pre>
+</div>
 <div class="cell-output-display">
-<div id="fig-example-geom-point" class="quarto-figure quarto-figure-center anchored" width="672">
+<div id="fig-example-geom-point" class="quarto-figure quarto-figure-center anchored" width="384">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-example-geom-point-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="part2_files/figure-html/fig-example-geom-point-1.png" class="img-fluid figure-img" width="672">
+<img src="part2_files/figure-html/fig-example-geom-point-1.png" class="img-fluid figure-img" width="384">
 </div>
 <figcaption class="figure quarto-float-caption quarto-float-fig" id="fig-example-geom-point-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;1: Plot of ear length against tail length. Ear length is on the X axis and tail length is on the Y axis. We learn that there is a reasonable positive correlation of tail length and ear length.
@@ -173,7 +168,7 @@ Figure&nbsp;1: Plot of ear length against tail length. Ear length is on the X ax
 </div>
 </div>
 </div>
-<p>The problem with this is ggplot removes the missing values. This makes them hard to explore. We can impute missings with values 10% lower than the minimum value in that variable, which puts these values in a margin area on the graphic. This method comes from <a href="https://en.wikipedia.org/wiki/GGobi"><code>ggobi</code></a> <span class="citation" data-cites="Cook2007">(<a href="#ref-Cook2007" role="doc-biblioref">Cook and Swayne 2007</a>)</span>, and <a href="http://www.rosuda.org/MANET/"><code>manet</code></a> <span class="citation" data-cites="Unwin1996">(<a href="#ref-Unwin1996" role="doc-biblioref">Unwin et al. 1996</a>)</span>.</p>
+<p>The problem with this is ggplot removes the missing values. It’s great that we get a warning message but this makes them hard to explore. We can impute missings with values 10% lower than the minimum value in that variable, which puts these values in a margin area on the graphic. This method comes from <a href="https://en.wikipedia.org/wiki/GGobi"><code>ggobi</code></a> <span class="citation" data-cites="Cook2007">(<a href="#ref-Cook2007" role="doc-biblioref">Cook and Swayne 2007</a>)</span>, and <a href="http://www.rosuda.org/MANET/"><code>manet</code></a> <span class="citation" data-cites="Unwin1996">(<a href="#ref-Unwin1996" role="doc-biblioref">Unwin et al. 1996</a>)</span>.</p>
 <p>This imputation is wrapped up in the <code>geom_miss_point()</code> ggplot2 geom. <a href="#fig-geom-miss-point" class="quarto-xref">Figure&nbsp;2</a> illustrates this by exploring the relationship between tail length and ear length from the rodents dataset.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(rodents, </span>
@@ -194,38 +189,70 @@ Figure&nbsp;2: Improved plot of tail length against ear length, we can now see t
 </div>
 </div>
 </div>
-<p>Being a proper ggplot geom, it supports all of the standard features of ggplot2, such as <strong>facets</strong> and <strong>themes</strong> as shown in <strong>?@fig-ggmissing-facet</strong>.</p>
+<p>Being a proper ggplot geom, it supports all of the standard features of ggplot2, such as <strong>facets</strong> and <strong>themes</strong> as shown in <a href="#fig-ggmissing-facet" class="quarto-xref">Figure&nbsp;3</a>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(rodents, </span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> ear_length, </span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> tail_length)) <span class="sc">+</span> </span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_miss_point</span>() <span class="sc">+</span> </span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>species) <span class="sc">+</span> </span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_dark</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-ggmissing-facet" class="quarto-figure quarto-figure-center anchored" width="480">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ggmissing-facet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="part2_files/figure-html/fig-ggmissing-facet-1.png" class="img-fluid figure-img" width="480">
+</div>
+<figcaption class="figure quarto-float-caption quarto-float-fig" id="fig-ggmissing-facet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: A faceted version of the improved tail length against ear length plot where each species is split out into its own subplot.
+</figcaption>
+</figure>
+</div>
+</div>
 </div>
 </section>
 <section id="exploring-using-modelling" class="level2">
 <h2 class="anchored" data-anchor-id="exploring-using-modelling">Exploring using modelling</h2>
-<p>As evidenced by <strong>?@fig-gg-miss-upset</strong>, there is a structure in the missingness in the rodents data. We can perform some basic clustering on the missingness and then and learn which variables and their values predict these missingness groups using decision trees <span class="citation" data-cites="Tierney2015 Barnett2017">(<a href="#ref-Tierney2015" role="doc-biblioref">Tierney et al. 2015</a>; <a href="#ref-Barnett2017" role="doc-biblioref">Barnett et al. 2017</a>)</span>. We start by adding missingness clusters, choosing four based on <strong>?@fig-gg-miss-upset</strong>. We encourage exploring different numbers of clusters. We can then confirm this pattern using visualisations.</p>
+<p>The previous article introduced upset plots, as shown in <a href="#fig-gg-miss-upset" class="quarto-xref">Figure&nbsp;4</a>, to help identify structure in the missigness. We can perform some basic clustering on the missingness and then and learn which variables and their values predict these missingness groups using decision trees <span class="citation" data-cites="Tierney2015 Barnett2017">(<a href="#ref-Tierney2015" role="doc-biblioref">Tierney et al. 2015</a>; <a href="#ref-Barnett2017" role="doc-biblioref">Barnett et al. 2017</a>)</span>. We start by adding missingness clusters, choosing four based on <a href="#fig-gg-miss-upset" class="quarto-xref">Figure&nbsp;4</a>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>rodents_miss_clust <span class="ot">&lt;-</span> rodents <span class="sc">%&gt;%</span> <span class="fu">add_miss_cluster</span>(<span class="at">n_clusters =</span> <span class="dv">4</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">gg_miss_var</span>(rodents_miss_clust, <span class="at">facet =</span> miss_cluster)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gg_miss_upset</span>(rodents)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="part2_files/figure-html/gg-miss-var-cluster-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Number of missings for each variable for each cluster. We see clear patterns emerge where there are two variables missing in cluster two, six variables missing in cluster three, and not as many missings in clusters one and four.</figcaption>
+<div id="fig-gg-miss-upset" class="quarto-figure quarto-figure-center anchored" width="384">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gg-miss-upset-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="part2_files/figure-html/fig-gg-miss-upset-1.png" class="img-fluid figure-img" width="384">
+</div>
+<figcaption class="figure quarto-float-caption quarto-float-fig" id="fig-gg-miss-upset-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: An upset plot of 7 sets of missingness in the rodents data displaying a more nuanced depiction of the patterns of missingness in the data.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>We encourage exploring different numbers of clusters. We can then confirm this pattern using visualisations as shown in <a href="#fig-gg-miss-var-cluster" class="quarto-xref">Figure&nbsp;5</a>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>rodents_miss_clust <span class="ot">&lt;-</span> rodents <span class="sc">%&gt;%</span> </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_miss_cluster</span>(<span class="at">n_clusters =</span> <span class="dv">4</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">gg_miss_var</span>(rodents_miss_clust, <span class="at">facet =</span> miss_cluster)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-gg-miss-var-cluster" class="quarto-figure quarto-figure-center anchored" width="672">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gg-miss-var-cluster-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="part2_files/figure-html/fig-gg-miss-var-cluster-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="figure quarto-float-caption quarto-float-fig" id="fig-gg-miss-var-cluster-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Number of missings for each variable for each cluster. We see clear patterns emerge where there are two variables missing in cluster two, six variables missing in cluster three, and not as many missings in clusters one and four.
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
 <p>We use the R package <code>rpart</code> <span class="citation" data-cites="rpart">(<a href="#ref-rpart" role="doc-biblioref">Therneau and Atkinson 2023</a>)</span> to fit a classification and regression tree (CART) to the data using all variables.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rpart)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>rodent_miss_cart <span class="ot">&lt;-</span> <span class="fu">rpart</span>(</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">factor</span>(miss_cluster) <span class="sc">~</span> ., </span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> rodents_miss_clust</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rpart)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>rodent_miss_cart <span class="ot">&lt;-</span> <span class="fu">rpart</span>(</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">factor</span>(miss_cluster) <span class="sc">~</span> ., </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> rodents_miss_clust)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Variable importance scores (<a href="#tbl-var-imp" class="quarto-xref">Table&nbsp;1</a>) reveal the most important variables for predicting missingness cluster are date and sex.</p>
 <div class="cell">
@@ -284,18 +311,18 @@ Table&nbsp;1: Variable importance scores for predicting missingness cluster. The
 </section>
 <section id="how-do-we-explore-imputed-values" class="level1">
 <h1>How do we explore imputed values?</h1>
-<p>The <a href="https://cran.r-project.org/package=simputation"><code>simputation</code></a> package provides a nice interface to imputation. We will impute values for tail_length using the <code>impute_lm()</code> function, then visualise the data, as seen in <a href="#fig-simpute-invisible" class="quarto-xref">Figure&nbsp;3</a>.</p>
+<p>The <a href="https://cran.r-project.org/package=simputation"><code>simputation</code></a> package provides a nice interface to imputation. We will impute values for <code>tail_length</code> and <code>weight</code> using the <code>impute_lm()</code> function, then visualise the data, as seen in <a href="#fig-simpute-invisible" class="quarto-xref">Figure&nbsp;6</a>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(simputation)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>rodents <span class="sc">%&gt;%</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">impute_lm</span>(tail_length <span class="sc">~</span> species <span class="sc">+</span> age) <span class="sc">%&gt;%</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> weight,</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">y =</span> tail_length)) <span class="sc">+</span> </span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(simputation)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>rodents <span class="sc">%&gt;%</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">impute_lm</span>(tail_length <span class="sc">~</span> species <span class="sc">+</span> age) <span class="sc">%&gt;%</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">impute_lm</span>(weight <span class="sc">~</span> species <span class="sc">+</span> age) <span class="sc">%&gt;%</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> weight,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">y =</span> tail_length)) <span class="sc">+</span> </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Warning: Removed 237 rows containing missing values (`geom_point()`).</code></pre>
+<pre><code>Warning: Removed 180 rows containing missing values or values outside the scale range
+(`geom_point()`).</code></pre>
 </div>
 <div class="cell-output-display">
 <div id="fig-simpute-invisible" class="quarto-figure quarto-figure-center anchored" width="672">
@@ -304,18 +331,18 @@ Table&nbsp;1: Variable importance scores for predicting missingness cluster. The
 <img src="part2_files/figure-html/fig-simpute-invisible-1.png" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="figure quarto-float-caption quarto-float-fig" id="fig-simpute-invisible-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: Imputed values are not visible. A plot of tail length by weight. The Imputed tail length values are not visible because we have no way to identify them in the data.
+Figure&nbsp;6: Imputed values are not visible. A plot of tail length by weight. The Imputed tail length values are not visible because we have no way to identify them in the data.
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p>We don’t get any warnings regarding missing observations - because they are all imputed! However this comes at a cost: we don’t know where the imputations are - they are now sort of invisible.</p>
+<p>In <a href="#fig-simpute-invisible" class="quarto-xref">Figure&nbsp;6</a> we don’t get any warnings regarding missing observations - because they are all imputed! However this comes at a cost: we don’t know where the imputations are - they are now sort of invisible.</p>
 <p>We can track a copy of the missing data locations by using the function <code>nabular()</code>, which binds another dataset to the current one which notes the locations of the missing data. “Nabular” data is a really important idea in <code>naniar</code>, but to keep it brief, for each column with missing values, a new column is created to help identify misingness. For example, a new column called <code>ear_length_NA</code> is created:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nabular</span>(rodents) <span class="sc">|&gt;</span> </span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">starts_with</span>(<span class="st">"ear_length"</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nabular</span>(rodents) <span class="sc">|&gt;</span> </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">starts_with</span>(<span class="st">"ear_length"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 2
   ear_length ear_length_NA
@@ -329,63 +356,64 @@ Figure&nbsp;3: Imputed values are not visible. A plot of tail length by weight. 
 </div>
 </div>
 <p>The key takeaway here is there is now a copy of the data bound to it, with each column ending in <code>_NA</code>, and the values either being “NA” for missing, or “!NA” for not missing. For more details on the ideas underlying this, and the benefits, we recommend reading our paper, “Expanding Tidy Data Principles to Facilitate Missing Data Exploration, Visualization and Assessment of Imputations” <span class="citation" data-cites="Tierney2023">(<a href="#ref-Tierney2023" role="doc-biblioref">Tierney and Cook 2023</a>)</span>.</p>
-<p>Using the shadow matrix to keep track of where the missings are, you can actually keep track of the imputations, colouring by what was previously missing in tail_length. For example, let’s create the nabular data, then impute the data using a random forst, and plot it in <a href="#fig-simpute-visible-lm" class="quarto-xref">Figure&nbsp;4</a>.</p>
+<p>Using the shadow matrix to keep track of where the missings are, you can actually keep track of the imputations, colouring by what was previously missing in tail_length. For example, let’s create the nabular data, then impute the data for both <code>tail_length</code> and <code>weight</code> using a random forest, and plot it in <a href="#fig-simpute-visible-lm" class="quarto-xref">Figure&nbsp;7</a>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>rodents_nabular <span class="ot">&lt;-</span> rodents <span class="sc">%&gt;%</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nabular</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>()</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>rodents_lm_tail_imputed <span class="ot">&lt;-</span> rodents_nabular <span class="sc">%&gt;%</span> </span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">impute_lm</span>(tail_length <span class="sc">~</span> species <span class="sc">+</span> date) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">impute_lm</span>(weight <span class="sc">~</span> tail_length <span class="sc">+</span> species <span class="sc">+</span> date)</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(rodents_lm_tail_imputed,</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>         <span class="fu">aes</span>(<span class="at">x =</span> weight,</span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>             <span class="at">y =</span> tail_length,</span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>             <span class="at">colour =</span> tail_length_NA)) <span class="sc">+</span> </span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> </span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>rodents_nabular <span class="ot">&lt;-</span> rodents <span class="sc">%&gt;%</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nabular</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>()</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>rodents_lm_tail_imputed <span class="ot">&lt;-</span> rodents_nabular <span class="sc">%&gt;%</span> </span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">impute_lm</span>(tail_length <span class="sc">~</span> species <span class="sc">+</span> date) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">impute_lm</span>(weight <span class="sc">~</span> tail_length <span class="sc">+</span> species <span class="sc">+</span> date)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(rodents_lm_tail_imputed,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>         <span class="fu">aes</span>(<span class="at">x =</span> weight,</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>             <span class="at">y =</span> tail_length,</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>             <span class="at">colour =</span> tail_length_NA)) <span class="sc">+</span> </span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div id="fig-simpute-visible-lm" class="quarto-figure quarto-figure-center anchored" width="672">
+<div id="fig-simpute-visible-lm" class="quarto-figure quarto-figure-center anchored" width="576">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-simpute-visible-lm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="part2_files/figure-html/fig-simpute-visible-lm-1.png" class="img-fluid figure-img" width="672">
+<img src="part2_files/figure-html/fig-simpute-visible-lm-1.png" class="img-fluid figure-img" width="576">
 </div>
 <figcaption class="figure quarto-float-caption quarto-float-fig" id="fig-simpute-visible-lm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4: Linear model imputed values of tail length in a scatterplot of tail length vs weight. Weight is on the X axis and tail_length is on the Y axis, and the points are coloured by whether they are imputed - ‘NA’ indicates a previously missing value that has been imputed. We can see where imputations are added, but they are very concentrated
+Figure&nbsp;7: Linear model imputed values of tail length in a scatterplot of tail length vs weight. Weight is on the X axis and tail_length is on the Y axis, and the points are coloured by whether their tail length values are imputed - ‘NA’ indicates a previously missing value that has been imputed. We can see where imputations are added, but they are very concentrated.
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p>The <code>simputation</code> package has a nice option to add residual noise to the imputations - in this case we can add some normal noise to the observations, where the residuals are draws with replacement from the model residuals. This gives us much greater variation in the imputations. For comparison to other naive approaches, we will also add mean imputation for comparison</p>
-<p>Importantly, we can actually compare the two methods as below. This first imputes the data using the residual method, then rowbinds the two datasets together, creating a column called “imputation_type”, which records which type of imputation was used, either “add_residual” or “no_residual”:</p>
+<p>The <code>simputation</code> package has a nice option to add residual noise to the imputations - in this case we can add some normal noise to the observations, where the residuals are draws with replacement from the model residuals. This gives us much greater variation in the imputations.</p>
+<p>The different imputation methods are visualised side by side in <a href="#fig-imputed-comparison" class="quarto-xref">Figure&nbsp;8</a>. We have also included mean imputation, as a naive comparison. This first imputes the data using the residual method, then rowbinds the two datasets together, creating a column called “imputation_type”, which records which type of imputation was used, either “add_residual” or “no_residual”.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>rodents_lm_tail_imputed_res <span class="ot">&lt;-</span> rodents_nabular <span class="sc">%&gt;%</span> </span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">impute_lm</span>(tail_length <span class="sc">~</span> species <span class="sc">+</span> date, <span class="at">add_residual =</span> <span class="st">"observed"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">impute_lm</span>(weight <span class="sc">~</span> tail_length <span class="sc">+</span> species <span class="sc">+</span> date, <span class="at">add_residual =</span> <span class="st">"observed"</span>)</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>rodents_mean_imputed <span class="ot">&lt;-</span> rodents <span class="sc">%&gt;%</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nabular</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">impute_mean_all</span>()</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>rodents_imputed_comparison <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">add_residual =</span> rodents_lm_tail_imputed_res,</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">no_residual =</span> rodents_lm_tail_imputed,</span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean_imp =</span> rodents_mean_imputed,</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">.id =</span> <span class="st">"imputation_type"</span></span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span> <span class="fu">as_tibble</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>rodents_lm_tail_imputed_res <span class="ot">&lt;-</span> rodents_nabular <span class="sc">%&gt;%</span> </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">impute_lm</span>(tail_length <span class="sc">~</span> species <span class="sc">+</span> date, </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">add_residual =</span> <span class="st">"observed"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">impute_lm</span>(weight <span class="sc">~</span> tail_length <span class="sc">+</span> species <span class="sc">+</span> date,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">add_residual =</span> <span class="st">"observed"</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>rodents_mean_imputed <span class="ot">&lt;-</span> rodents <span class="sc">%&gt;%</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nabular</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">impute_mean_all</span>()</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>rodents_imputed_comparison <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">add_residual =</span> rodents_lm_tail_imputed_res,</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">no_residual =</span> rodents_lm_tail_imputed,</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean_imp =</span> rodents_mean_imputed,</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">.id =</span> <span class="st">"imputation_type"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>We can see see the two different imputation methods side by side in <a href="#fig-imputed-comparison" class="quarto-xref">Figure&nbsp;5</a>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(rodents_imputed_comparison,</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>         <span class="fu">aes</span>(<span class="at">x =</span> weight,</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">y =</span> tail_length,</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">colour =</span> tail_length_NA)) <span class="sc">+</span> </span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> </span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>) <span class="sc">+</span> </span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>imputation_type)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(rodents_imputed_comparison,</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>         <span class="fu">aes</span>(<span class="at">x =</span> weight,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">y =</span> tail_length,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">colour =</span> tail_length_NA)) <span class="sc">+</span> </span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> </span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>) <span class="sc">+</span> </span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>imputation_type)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div id="fig-imputed-comparison" class="quarto-figure quarto-figure-center anchored" width="672">
 <figure class="quarto-float quarto-float-fig figure">
@@ -393,7 +421,7 @@ Figure&nbsp;4: Linear model imputed values of tail length in a scatterplot of ta
 <img src="part2_files/figure-html/fig-imputed-comparison-1.png" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="figure quarto-float-caption quarto-float-fig" id="fig-imputed-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5: Comparing imputation methods of tail length in a scatterplot of tail length vs weight. Weight is on the X axis and tail_length is on the Y axis, and the points are coloured by whether they are imputed - ‘NA’ indicates a previously missing value that has been imputed. We learn that mean imputation provides imputations that are not representative, linear models with no residuals are representative of the data but very concentrated, and adding residuals adds much more variation to your data.
+Figure&nbsp;8: Comparing imputation methods of tail length in a scatterplot of tail length vs weight. Weight is on the X axis and tail_length is on the Y axis, and the points are coloured by whether they are imputed - ‘NA’ indicates a previously missing value that has been imputed. We learn that mean imputation provides imputations that are not representative, linear models with no residuals are representative of the data but very concentrated, and adding residuals adds much more variation to your data.
 </figcaption>
 </figure>
 </div>
@@ -402,7 +430,7 @@ Figure&nbsp;5: Comparing imputation methods of tail length in a scatterplot of t
 </section>
 <section id="conclusion" class="level1">
 <h1>Conclusion</h1>
-<p>In this software corner we have demonstrated the use of the <code>visdat</code> and <code>naniar</code> R packages for exploring and understanding missing data.</p>
+<p>In these two software corner articles we have demonstrated the use of the <code>visdat</code> and <code>naniar</code> R packages for exploring and understanding missing data. To find out more please take a look at the vignettes for <a href="https://cran.r-project.org/web/packages/visdat/vignettes/using_visdat.html">visdat</a> and <a href="https://cran.r-project.org/web/packages/naniar/vignettes/getting-started-w-naniar.html">naniar</a>.</p>
 </section>
 <section id="references" class="level1 unnumbered">
 
@@ -418,6 +446,9 @@ Cook, Dianne, and Deborah F. Swayne. 2007. <em>Interactive and <span>Dynamic</sp
 </div>
 <div id="ref-vip" class="csl-entry" role="listitem">
 Greenwell, Brandon M., and Bradley C. Boehmke. 2020. <span>“Variable Importance Plots—an Introduction to the Vip Package.”</span> <em>The R Journal</em> 12 (1): 343–66. <a href="https://doi.org/10.32614/RJ-2020-013">https://doi.org/10.32614/RJ-2020-013</a>.
+</div>
+<div id="ref-hope2023" class="csl-entry" role="listitem">
+Hope, Andrew. 2023. <span>“<span>CSM08</span> <span>Small</span> Mammal Host-Parasite Sampling Data for 16 Linear Trapping Transects Located in 8 <span>LTER</span> Burn Treatment Watersheds at <span>Konza</span> <span>Prairie</span>.”</span> Environmental Data Initiative. <a href="https://doi.org/10.6073/PASTA/F7BFB7226B093C817DC391C34A88B514">https://doi.org/10.6073/PASTA/F7BFB7226B093C817DC391C34A88B514</a>.
 </div>
 <div id="ref-rpart.plot" class="csl-entry" role="listitem">
 Milborrow, Stephen. 2022. <em>Rpart.plot: Plot ’Rpart’ Models: An Enhanced Version of ’Plot.rpart’</em>. <a href="https://CRAN.R-project.org/package=rpart.plot">https://CRAN.R-project.org/package=rpart.plot</a>.

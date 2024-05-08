@@ -31,7 +31,7 @@ rodents <- readr::read_csv("data/rodents.csv")
 
 # Introduction
 
-When you do data analysis, you come across missing data. Because I felt so frustrated by how hard it was to handle and wrangle missing data, I wanted to make it easier. In my endeavours I have written two R packages, `visdat` and `naniar`, for exploring missing data, and several papers on the topic. 
+When you do data analysis, you come across missing data. Because I felt so frustrated by how hard it was to handle and wrangle missing data, I wanted to make it easier. In my endeavours I have written two R packages, `visdat` and `naniar`, for exploring missing data, and several papers on the topic [@visdat; @Tierney2023; @borg2022]. 
 
 The present goal is to share some ideas on exploring missing data, using `naniar`, and `visdat`. To that end, we will focus on four questions.
 
@@ -101,7 +101,7 @@ Being a proper ggplot geom, it supports all of the standard features of ggplot2,
 #| echo: true
 #| fig-height: 4
 #| fig-width: 5
-#| fig-cap: "A faceted version of the improved tail length against ear length plot where each species is split out into its own subplot."
+#| fig-cap: "A faceted version of the improved tail length against ear length plot where each species is split out into its own subplot. We learn that there are different patterns of missing data for each species."
 
 ggplot(rodents, 
        aes(x = ear_length, 
@@ -113,15 +113,13 @@ ggplot(rodents,
 
 ## Exploring using modelling
 
-
-
 The previous article introduced upset plots, as shown in  @fig-gg-miss-upset, to help identify structure in the missigness.  We can perform some basic clustering on the missingness and then and learn which variables and their values predict these missingness groups using decision trees [@Tierney2015; @Barnett2017]. We start by adding missingness clusters, choosing four based on @fig-gg-miss-upset. 
 
 ```{r}
 #| label: fig-gg-miss-upset
 #| fig-height: 3
 #| fig-width: 4
-#| fig-cap: "An upset plot of 7 sets of missingness in the rodents data displaying a more nuanced depiction of the patterns of missingness in the data."
+#| fig-cap: "An upset plot of 7 sets of missingness in the rodents data displaying a more nuanced depiction of the patterns of missingness in the data. The size of each combination of missingness in variables is plotted. We learn that the two biggest sets of missingness occur when ear length and total length are missing, and when weight, hind foot length, tail length, ear length, and total length all go missing together."
 gg_miss_upset(rodents)
 ```
 
@@ -130,13 +128,13 @@ We encourage exploring different numbers of clusters. We can then confirm this p
 ```{r}
 #| label: fig-gg-miss-var-cluster
 #| fig-height: 4
-#| fig-cap: "Number of missings for each variable for each cluster. We see clear patterns emerge where there are two variables missing in cluster two, six variables missing in cluster three, and not as many missings in clusters one and four."
-rodents_miss_clust <- rodents %>% 
+#| fig-cap: "Number of missings for each variable plotted in a subplot for each cluster. We see clear patterns emerge where there are two variables missing in cluster two, six variables missing in cluster three, and not as many missings in clusters one and four."
+rodents_miss_clust <- rodents |> 
   add_miss_cluster(n_clusters = 4)
 gg_miss_var(rodents_miss_clust, facet = miss_cluster)
 ```
 
-We use the R package `rpart` [@rpart] to fit a classification and regression tree (CART) to the data using all variables.
+We use the R package `rpart` [@rpart] to fit a classification and regression tree (CART) to the data using all variables. This technique for exploring structured missingness in data was explored in more detail in @tierney2015.
 
 ```{r}
 library(rpart)
@@ -174,9 +172,9 @@ The [`simputation`](https://cran.r-project.org/package=simputation) package prov
 #| fig-cap: "Imputed values are not visible. A plot of tail length by weight. The Imputed tail length values are not visible because we have no way to identify them in the data."
 
 library(simputation)
-rodents %>%
-  impute_lm(tail_length ~ species + age) %>%
-  impute_lm(weight ~ species + age) %>%
+rodents |>
+  impute_lm(tail_length ~ species + age) |>
+  impute_lm(weight ~ species + age) |>
   ggplot(aes(x = weight,
              y = tail_length)) + 
   geom_point()
@@ -195,7 +193,7 @@ nabular(rodents) |>
 
 The key takeaway here is there is now a copy of the data bound to it, with each column ending in `_NA`, and the values either being "NA" for missing, or "!NA" for not missing. For more details on the ideas underlying this, and the benefits, we recommend reading our paper, "Expanding Tidy Data Principles to Facilitate Missing Data Exploration, Visualization and Assessment of Imputations" [@Tierney2023].
 
-Using the shadow matrix to keep track of where the missings are, you can actually keep track of the imputations, colouring by what was previously missing in tail_length. For example, let's create the nabular data, then impute the data for both `tail_length` and `weight` using a random forest, and plot it in @fig-simpute-visible-lm.
+Using the shadow matrix to keep track of where the missings are, you can actually keep track of the imputations, colouring by what was previously missing in `tail_length`. For example, let's create the nabular data, then impute the data for both `tail_length` and `weight` using a random forest, and plot it in @fig-simpute-visible-lm.
 
 ```{r}
 #| label: fig-simpute-visible-lm
@@ -204,12 +202,12 @@ Using the shadow matrix to keep track of where the missings are, you can actuall
 #| fig-width: 6
 #| fig-cap: "Linear model imputed values of tail length in a scatterplot of tail length vs weight. Weight is on the X axis and tail_length is on the Y axis, and the points are coloured by whether their tail length values are imputed - 'NA' indicates a previously missing value that has been imputed. We can see where imputations are added, but they are very concentrated."
 
-rodents_nabular <- rodents %>%
-  nabular() %>% 
+rodents_nabular <- rodents |>
+  nabular() |> 
   as.data.frame()
 
-rodents_lm_tail_imputed <- rodents_nabular %>% 
-  impute_lm(tail_length ~ species + date) %>% 
+rodents_lm_tail_imputed <- rodents_nabular |> 
+  impute_lm(tail_length ~ species + date) |> 
   impute_lm(weight ~ tail_length + species + date)
 
 ggplot(rodents_lm_tail_imputed,
@@ -227,22 +225,22 @@ The different imputation methods are visualised side by side in @fig-imputed-com
 
 ```{r}
 #| warning: false
-rodents_lm_tail_imputed_res <- rodents_nabular %>% 
+rodents_lm_tail_imputed_res <- rodents_nabular |> 
   impute_lm(tail_length ~ species + date, 
-            add_residual = "observed") %>% 
+            add_residual = "observed") |> 
   impute_lm(weight ~ tail_length + species + date,
             add_residual = "observed")
 
-rodents_mean_imputed <- rodents %>%
-  nabular() %>% 
-  as.data.frame() %>% 
+rodents_mean_imputed <- rodents |>
+  nabular() |> 
+  as.data.frame() |> 
   impute_mean_all()
 
 rodents_imputed_comparison <- bind_rows(
   add_residual = rodents_lm_tail_imputed_res,
   no_residual = rodents_lm_tail_imputed,
   mean_imp = rodents_mean_imputed,
-  .id = "imputation_type") %>% 
+  .id = "imputation_type") |> 
   as_tibble()
 ```
 
